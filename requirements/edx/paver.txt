@@ -7,9 +7,7 @@
 certifi==2022.9.24
     # via requests
 charset-normalizer==2.0.12
-    # via
-    #   -c requirements/edx/../constraints.txt
-    #   requests
+    # via requests
 edx-opaque-keys==2.3.0
     # via -r requirements/edx/paver.in
 idna==3.4
@@ -32,7 +30,6 @@ psutil==5.9.2
     # via -r requirements/edx/paver.in
 pymongo==3.12.3
     # via
-    #   -c requirements/edx/../constraints.txt
     #   -r requirements/edx/paver.in
     #   edx-opaque-keys
 python-memcached==1.59
