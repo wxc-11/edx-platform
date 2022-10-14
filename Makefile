@@ -132,6 +132,9 @@ compile-requirements: pre-requirements $(COMMON_CONSTRAINTS_TXT) ## Re-compile *
 	${COMPILE_CMD} ${COMPILE_OPTS} -o requirements/edx/development.txt requirements/edx/development.in ${PIPLOCK}
 	@# ^ Adding anything to this list? Make sure to add it to lock-all.in as well.
 
+	@# Delete the megalock file since it was only required for compilation.
+	rm requirements/edx/lock-all.txt
+
 	# Let tox control the Django version for tests
 	grep -e "^django==" requirements/edx/base.txt > requirements/edx/django.txt
 	sed '/^[dD]jango==/d' requirements/edx/testing.txt > requirements/edx/testing.tmp
