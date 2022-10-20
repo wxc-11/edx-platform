@@ -290,10 +290,6 @@ def get_user_course_outline_details(course_key: CourseKey,
     with function_trace('learning_sequences.api.get_user_course_outline_details.special_exams'):
         special_exams_processor = processors['special_exams']
         special_exam_attempts = special_exams_processor.exam_data(user_course_outline)
-    
-    # special_exam_attempts = SpecialExamAttemptData(
-    #     sequences={},
-    # )
 
     return UserCourseOutlineDetailsData(
         outline=user_course_outline,
