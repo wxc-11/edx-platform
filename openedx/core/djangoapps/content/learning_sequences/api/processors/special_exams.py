@@ -20,7 +20,6 @@ from django.utils.translation import gettext as _
 
 from ...data import SpecialExamAttemptData, UserCourseOutlineData
 from .base import OutlineProcessor
-from lms.djangoapps.course_api.blocks.transformers.milestones import generate_special_exam_attempt_context
 from openedx.core.djangoapps.course_apps.toggles import exams_ida_enabled
 
 
@@ -57,7 +56,7 @@ class SpecialExamsOutlineProcessor(OutlineProcessor):
                     if not bool(sequence.exam):
                         continue
 
-                    special_exam_attempt_context = generate_special_exam_attempt_context(
+                    special_exam_attempt_context = self._generate_special_exam_attempt_context(
                         sequence.exam.is_practice_exam,
                         sequence.exam.is_proctored_enabled,
                         sequence.exam.is_time_limited,
@@ -65,39 +64,6 @@ class SpecialExamsOutlineProcessor(OutlineProcessor):
                         self.course_key,
                         str(sequence.usage_key)
                     )
-                    # special_exam_attempt_context = None
-                    
-                    # # if exams waffle flag enabled, get exam type internally
-                    # if exams_ida_enabled(self.course_key):
-                    #     # add short description based on exam type
-                    #     if sequence.exam.is_practice_exam:
-                    #         exam_type = _('Practice Exam')
-                    #     elif sequence.exam.is_proctored_enabled:
-                    #         exam_type = _('Proctored Exam')
-                    #     elif sequence.exam.is_time_limited:
-                    #         exam_type = _('Timed Exam')
-                    #     else:  # sets a default, though considered impossible
-                    #         log.info('Using a default value, but it is considered impossible.')
-                    #         exam_type = _('Exam')
-
-                    #     summary = {'short_description': exam_type, }
-                    #     special_exam_attempt_context = summary
-                    # else:
-                    #     try:
-                    #         # Calls into edx_proctoring subsystem to get relevant special exam information.
-                    #         # This will return None, if (user, course_id, content_id) is not applicable.
-                    #         special_exam_attempt_context = get_attempt_status_summary(
-                    #             self.user.id,
-                    #             str(self.course_key),
-                    #             str(sequence.usage_key)
-                    #         )
-                    #     except ProctoredExamNotFoundException:
-                    #         log.info(
-                    #             'No exam found for {sequence_key} in {course_key}'.format(
-                    #                 sequence_key=sequence.usage_key,
-                    #                 course_key=self.course_key
-                    #             )
-                    #         )
 
                     if special_exam_attempt_context:
                         # Return exactly the same format as the edx_proctoring API response
@@ -106,3 +72,38 @@ class SpecialExamsOutlineProcessor(OutlineProcessor):
         return SpecialExamAttemptData(
             sequences=sequences,
         )
+    
+    def _generate_special_exam_attempt_context(self, is_practice_exam, is_proctored_enabled, is_timed_exam, user_id, course_key, block_key):
+        """
+        Helper method which generates the special exam attempt context.
+        Either calls into proctoring or, if exams ida waffle flag on, then get internally.
+        """
+        special_exam_attempt_context = None
+
+        # if exams waffle flag enabled, get exam type internally
+        if exams_ida_enabled(course_key):
+            # add short description based on exam type
+            if is_practice_exam:
+                exam_type = _('Practice Exam')
+            elif is_proctored_enabled:
+                exam_type = _('Proctored Exam')
+            elif is_timed_exam:
+                exam_type = _('Timed Exam')
+            else:  # sets a default, though considered impossible
+                log.info('Using a default value, but it is considered impossible.')
+                exam_type = _('Exam')
+
+            summary = {'short_description': exam_type, }
+            special_exam_attempt_context = summary
+        else:
+            try:
+                # Calls into edx_proctoring subsystem to get relevant special exam information.
+                special_exam_attempt_context = get_attempt_status_summary(
+                    user_id,
+                    str(course_key),
+                    block_key
+                )
+            except ProctoredExamNotFoundException as ex:
+                log.exception(ex)
+
+        return special_exam_attempt_context
