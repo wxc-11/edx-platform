@@ -124,6 +124,8 @@ class MilestonesAndSpecialExamsTransformer(BlockStructureTransformer):
             str(block_key)
         )
 
+        print("****************************GOES HERE**********************************************")
+
         if special_exam_attempt_context:
             # This user has special exam context for this block so add it.
             block_structure.set_transformer_block_field(
