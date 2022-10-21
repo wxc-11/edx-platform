@@ -172,7 +172,7 @@ class MilestonesAndSpecialExamsTransformer(BlockStructureTransformer):
 
         return False
 
-    def _generate_special_exam_attempt_context(self, is_practice_exam, is_proctored_enabled, 
+    def _generate_special_exam_attempt_context(self, is_practice_exam, is_proctored_enabled,
             is_timed_exam, user_id, course_key, block_key):
         """
         Helper method which generates the special exam attempt context.
